@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><title>Admin Login</title></head>
+<body>
+  <h2>Admin Login</h2>
+  <form method="post">
+    Password: <input type="password" name="password" required>
+    <button type="submit">Login</button>
+  </form>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <p style="color:red;">{{ messages[0] }}</p>
+    {% endif %}
+  {% endwith %}
+</body>
+</html>

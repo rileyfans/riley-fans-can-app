@@ -1,11 +1,10 @@
-from flask import Flask, render_template, request, redirect, flash
+from flask import Flask, render_template, request, redirect, flash, session, send_from_directory
 import os
 from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("ADMIN_PASSWORD", "David452")
 
-# Where fan cards will be stored
 CARD_DIR = "fan_cards"
 os.makedirs(CARD_DIR, exist_ok=True)
 
@@ -32,11 +31,32 @@ def donate():
     return render_template("donate.html")
 
 
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "POST":
+        password = request.form["password"]
+        if password == app.secret_key:
+            session["admin"] = True
+            return redirect("/admin")
+        else:
+            flash("Incorrect password")
+    return render_template("login.html")
+
+
 @app.route("/admin")
 def admin():
-    password = request.args.get("password")
-    if password != app.secret_key:
-        return "Unauthorized", 403
+    if not session.get("admin"):
+        return redirect("/admin/login")
 
     cards = os.listdir(CARD_DIR)
     return render_template("admin.html", cards=cards)
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+    
+@app.route("/fan_cards/<filename>")
+def get_card(filename):
+    return send_from_directory(CARD_DIR, filename)
